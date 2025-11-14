@@ -35,6 +35,8 @@ Explications des options :
 - le chemin trouvé,
 - ainsi que l’état de la pile à chaque étape.
 
+exemple1.dot : Graphe d’entrée sur lequel on recherche un chemin. Il est également possible de tester des graphes plus complexes présents dans exemple2.dot et exemple3.dot
+
 
 
 
