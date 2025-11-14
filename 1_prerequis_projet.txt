@@ -1,4 +1,3 @@
-
 🎯 BUT : Faire une réduction polynomiale TUNNEL -> SAT 
 
 = Construire une formule logique φ telle que :
@@ -76,6 +75,8 @@ Un chemin simple signifie :
 
 
 
+// *********** Fichiers nécessaires pour la réduction du problème TUNNEL vers SAT *********** //
+
 Voici le Graph (graphs > TunnelNetwork > exemple1.dot) qui va nous permettre de vérifier que la réduction SAT trouve exactement un seul chemin valide :
 
 digraph A {
@@ -103,5 +104,20 @@ car c’est le seul qui respecte correctement la pile [4] → [6,4] → [6,4] �
 
 
 
+👉 Dans notre fichier principal TunnelReduction.c, on fera appel à des fonctions qui se trouvent dans le fichier TunnelNetwork.c pour interroger le graphe Tunnel (nœuds, arêtes, actions) et ainsi construire correctement les contraintes de la formule SAT.
 
+Voici les fonctions dans TunnelNetwork.c que nous utiliserons :
 
+- tn_get_num_nodes() : savoir combien il y a de nœuds = boucler correctement sur toutes les positions
+- tn_is_edge() : savoir si une arête existe = écrire les contraintes de transition (graphe)
+- tn_node_has_action() : savoir si un nœud peut PUSH/POP/T = écrire les contraintes de transition (pile)
+- tn_get_initial(), tn_get_final() : connaître s et d = conditions initiales/finales
+- tn_get_node_name() : connaître les noms (debug) = affichage, tests
+
+👉 C’est grâce à TunnelNetwork.c que ta réduction sait :
+
+- quels nœuds existent
+- quelles arêtes existent
+- quelles actions sont possibles
+- où commence et où finit le chemin
+- comment chaque nœud se comporte (T/PUSH/POP)
