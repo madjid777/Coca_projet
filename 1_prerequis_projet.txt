@@ -1,0 +1,107 @@
+
+🎯 BUT : Faire une réduction polynomiale TUNNEL -> SAT 
+
+= Construire une formule logique φ telle que :
+
+	- φ est satisfiable ssi il existe un chemin valide dans le graph
+
+Autrement dit :
+
+Un chemin valide existe ssi le solveur Z3 trouve un modèle qui satisfait φ
+
+NB - Z3 = Solver = vérifie si φ est satisfiable (SAT), Nous n'avons pas besoin de développer le Solver Z3, car il est déjà fourni comme bibliothèque, et nous y accédons via son API.
+
+Voici les principales fonctions Z3 qu'on utilisera pour construire la formule φ :
+
+- Z3_mk_and
+- Z3_mk_or
+- Z3_mk_not
+- Z3_mk_implies
+- Z3_mk_eq
+- Z3_mk_true / false
+- Z3_mk_context
+- Z3_mk_solver 
+
+
+
+
+🧩 Définition du problème : 
+
+On cherche à savoir s’il existe un chemin simple de longueur 𝑙 allant d’un nœud de départ 𝑠 à un nœud d’arrivée 𝑑.
+
+Un chemin simple signifie :
+
+- Aucun cycle
+- Aucun nœud n’est visité plus d’une fois
+
+
+⚠️ Contraintes à respecter
+
+- Pas de cycles
+- Pas de répétition de nœuds
+- Pas de retour en arrière
+- Chaque nœud apparaît au plus une fois dans tout le chemin
+
+
+🧠 À savoir
+
+- Inutile de démontrer que TUNNEL est NP-complet (c’est un aspect théorique, pas à implémenter).
+- Z3 : vérifie si la formule φ est satisfiable.
+- tn_reduction : construit la formule φ.
+- tn_get_path_from_model : reconstruit le chemin valide à partir du modèle trouvé par Z3.
+
+
+⚙️ Étapes de la réduction polynomiale (TUNNEL → SAT)
+
+1. Définir les variables booléennes
+2. Ajouter les conditions initiales et finales
+3. Imposer les contraintes d’unicité
+4. Définir les contraintes de transition
+	- liées au graphe
+	- liées à la pile
+
+
+💻 Ordre optimal de codage dans tn_reduction
+
+1. Conditions initiales (facile)
+2. Conditions finales (facile)
+3. Unicité
+4. Simple path (pas de répétition de nœuds)
+5. Arêtes (transitions possibles dans le graphe)
+6. Transmission (propagation des états ou de la pile)
+7. PUSH (ajout dans la pile)
+8. POP (retrait de la pile)
+
+
+
+
+
+Voici le Graph (graphs > TunnelNetwork > exemple1.dot) qui va nous permettre de vérifier que la réduction SAT trouve exactement un seul chemin valide :
+
+digraph A {
+    s  [label="4→4"]      // Transmission IPv4
+    u1 [label="4↑46"]     // PUSH : 4 encap → 6
+    u2 [label="4→4"]      // Transmission IPv4
+    u3 [label="6→6"]      // Transmission IPv6
+    d  [label="46↓4"]     // POP : (6→4)
+    end [label="4→4"]     // Transmission IPv4 (nœud terminal)
+
+    s -> u1
+    u1 -> u2
+    u1 -> u3
+    u2 -> d
+    u3 -> d
+    d  -> end
+}
+
+
+👉 s → u1 → u3 → d → end
+
+car c’est le seul qui respecte correctement la pile [4] → [6,4] → [6,4] → [4] → [4].
+
+
+
+
+
+
+

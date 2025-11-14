@@ -1,0 +1,162 @@
+
+***************************** Quel sont les étapes de la reduction TUNNEL vers SAT ? (Vision globale du cours) ***************************** 
+
+
+// ------------------------------ [ETAPE 1] : Définir variables booléennes ------------------------------ //
+
+BUT : Définir les variables booléennes
+
+
+// --------- Dans le cours X_{u,i,k} --------- //
+
+- u = sommet
+- i = position
+- k = hauteur pile
+
+
+// --------- Dans le projet x_(node,pos,height) --------- //
+
+- node = sommet (u)
+- pos = position (i)
+- height = hauteur (k) 
+
+Définition des variables booléennes dans le code :
+
+x_(node,pos,height) = tn_path_variable = À la position pos dans le chemin, le nœud choisi est node, ET la pile a une hauteur égale à height.
+y_(pos,height,4) = tn_4_variable() = À la position pos (?), à la hauteur height (?) dans la pile, le protocole est 4.
+y_(pos,height,6) = tn_6_variable() = À la position pos (?), à la hauteur height (?), le protocole est 6.
+
+
+OÙ / COMMENT LE CODER ? (Déja fournis dans le code dans les fonctions) :
+
+- tn_path_variable()
+- tn_4_variable()
+- tn_6_variable()
+
+
+
+
+
+// ------------------------------ [ETAPE 2] : Conditions initiales et finales ------------------------------ //
+
+BUT : Formules posant s comme premier sommet (pile vide = [4]) et d comme dernier (pile vide = [4]) 
+Équivaut à : Ecrire une formule qui garantit que s est le premier sommet avec pile vide et d, le dernier sommet avec une pile vide.
+
+
+// --------- Dans le cours X_{u,i,k} --------- //
+
+- s est le premier sommet où la pile est vide (= [4]) = pile initiale = [4]
+- d est le dernier sommet où la pile est vide (= [4]) = pile finale = [4]
+
+
+// --------- Dans le projet --------- //
+
+CE QUE TU DOIS CODER : 
+
+Ajouter contraintes initiales :
+
+// s premier sommet avec pile vide
+
+✔️ pos = 0 → node = s 
+✔️ pile = [4]
+
+Et contraintes finales :
+
+// d dernier sommet avec pile vide
+
+✔️ pos = length → node = d
+✔️ pile = [4]
+
+
+OÙ / COMMENT LE CODER ?
+
+- Crée Fonction formula_initial_conditions()
+- Crée Fonction formula_final_conditions()
+
+
+
+
+
+// ------------------------------ [ETAPE 3] : Contraintes unicité + simple path ------------------------------ //
+
+BUT : Formule garantissant à chaque position : - exactement 1 sommet, - 1 seule hauteur, - chemin simple (sans cycles)
+Équivaut à : Ecrire les formules qui garantissent qu'a chaque position, il y a exactement un sommet avec 1 seul hauteur et que le chemin est simple (sans cycle).
+
+
+// --------- Dans le cours X_{u,i,k} --------- //
+
+La formule SAT sert à représenter exactement les chemins possibles dans le graphe !!! : 
+
+- Phi 2 Φ₂ (Unicité par position) : Pour chaque position i, il existe au moins un sommet avec une hauteur k à cette position.
+Pour tous u ≠ v il est impossible que u et v soient tous les deux à la même position.
+
+- Phi 3 Φ₃ (Unité de hauteur) : Pour chaque sommet u et chaque position i, il est impossible que le sommet u
+soit à la fois hauteur 0 et hauteur 1.
+
+- Phi 4 Φ₄ (Chemin simple = pas de cycles) : Pour un sommet u, il est impossible qu’il apparaisse à la fois à la position i
+et à la position j (i < j).
+
+
+// --------- Dans le projet --------- //
+
+CE QUE TU DOIS CODER : 
+
+✔️ Contrainte "unicité par position": → Unique({x_(node,pos,h)})
+
+✔️ Contrainte "simple path": → AtMost(1, {x_(same node, all pos, all h)})
+
+OÙ / COMMENT LE CODER ?
+
+Fonction formula_unique_node_per_position()
+Fonction formula_simple_path()
+
+
+
+
+
+// ------------------------------ [ETAPE 4] : Contraintes de transition (en 2 parties) ------------------------------ //
+
+BUT : Contraintes de transition (entre i et i+1) must ensure les actions : - T (Transmission) - PUSH - POP + existence d’une arête dans le graphe
+Equivaut à : Contraintes de transition : Ecrire une formule qui garantit qu'entre chausse position i et i+1, il existe une transition valide (PUSH, POP, T) avec une arrête dans le graph. 
+
+// --------- Dans le projet --------- //
+
+CE QUE TU DOIS CODER : 
+
+Partie 1 : Transition DU GRAPHE = ✔️ Vérifier l’existence d'une arête u → v dans le GRAPH : 
+
+→ implies(x_u,pos & x_v,pos+1, edge(u,v))
+
+
+
+Partie 2 : Transition DE LA PILE = ✔️ Vérifier que PUSH / POP / T sont possibles :
+
+→ h’ = h pour T
+→ h’ = h+1 pour PUSH
+→ h’ = h-1 pour POP
+→ et valeurs du protocole 4/6
+
+
+OÙ / COMMENT LE CODER ?
+
+Fonction : formula_valid_transitions()
+OU : formula_edges() + formula_stack_evolution() si tu veux découper proprement
+
+
+
+
+
+// ------------------------------ [ETAPE 5] : Justification réduction ------------------------------ //
+
+BUT : Justifier la réduction (dans le rapport PDF)
+Equivaut à : Justifier la réduction dans les 2 sens : Si chemin valide existe -> alors phi est Satisfaisable, Si phi est Satisfaisable alors chemin valide existe.
+
+// --------- Dans le PDF projet --------- //
+
+Écrire la justification en 2 sens dans ton document écrit :
+
+(⇒) Si un chemin valide existe, alors ta formule est satisfiable.
+(⇐) Si ta formule est satisfiable, alors le modèle correspond à un chemin valide.
+
+
+

@@ -1,0 +1,134 @@
+Étape 0 : Création des variables booléenne 
+
+
+
+
+
+// ********* Étape 1 : Création d'un squelette logique qui va ASSEMBLER toutes les sous-formules SAT à tn_reduction  ********* //
+
+Pour que notre réduction TUNNEL vers SAT marche, nous devons commencer par créer des sous-fonctions. Ces sous-fonctions font référence à chaque étape de notre réduction de TUNNEL vers SAT (étapes mentionnées dans le fichier 2_etapes_tunnel_vers_sat.txt). On suit la méthodologie SAT.
+
+Notre formule SAT finale qu'on cherche doit ressembler à : 
+
+φ_totale = φ_init ∧ φ_unicité ∧ φ_simple ∧ φ_transition
+
+
+
+
+### En d'autres termes :
+
+| **Ce que tu as fait**                    | **Dans la réduction SAT**                           |
+|------------------------------------------|-----------------------------------------------------|
+| `formula_initial_and_final_positions`    | Φ₁ : Conditions initiales/finales (ÉTAPE 2)        |
+| `formula_unique_node_per_position`       | Φ₂ : Unicité par position (ÉTAPE 3)                |
+| `formula_simple_path`                    | Φ₃ : Chemin simple sans cycle (ÉTAPE 3)            |
+| `formula_valid_transitions`              | Φ₄ : Transitions valides (ÉTAPE 4)                 |
+| `Z3_mk_and(ctx, k, parts)`               | **Conjonction finale : φ = Φ₁ ∧ Φ₂ ∧ Φ₃ ∧ Φ₄**     |
+
+
+
+
+
+
+φ_totale = φ_init ∧ φ_unicité ∧ φ_simple ∧ φ_transition
+           ║        ║          ║          ║
+           ║        ║          ║          ╚═══> parts[3] = formula_valid_transitions(...)
+           ║        ║          ╚══════════════> parts[2] = formula_simple_path(...)
+           ║        ╚═════════════════════════> parts[1] = formula_unique_node_per_position(...)
+           ╚══════════════════════════════════> parts[0] = formula_initial_and_final_positions(...)
+           
+                            ⬇️
+                            
+                   Z3_mk_and(ctx, 4, parts)
+                   
+                            ⬇️
+                            
+                    φ_totale (formule SAT complète)
+
+
+Donc : φ_totale = φ_init ∧ φ_unicité ∧ φ_simple ∧ φ_transition = Z3_mk_and(ctx, k, parts)
+
+
+
+
+
+
+--------> Dans le code :
+
+// Conditions initiales et finales : s au début, d à la fin, pile [4]
+static Z3_ast formula_initial_and_final_positions(Z3_context ctx,
+                                                  const TunnelNetwork network,
+                                                  int length);
+                                                  
+// Unicité : à chaque position, exactement un (node,height)
+static Z3_ast formula_unique_node_per_position(Z3_context ctx,
+                                               const TunnelNetwork network,
+                                               int length);
+
+// Chemin simple : chaque node apparaît au plus une fois
+static Z3_ast formula_simple_path(Z3_context ctx,
+                                  const TunnelNetwork network,
+                                  int length);
+
+// Transitions valides : graphe + pile (T, PUSH, POP)
+static Z3_ast formula_valid_transitions(Z3_context ctx,
+                                        const TunnelNetwork network,
+                                        int length);
+
+// Fonction qui permet de construire la reduction
+
+Z3_ast tn_reduction(Z3_context ctx, const TunnelNetwork network, int length)
+{
+    Z3_ast parts[4];
+    int k = 0;
+
+    parts[k++] = formula_initial_and_final_positions(ctx, network, length);
+    parts[k++] = formula_unique_node_per_position(ctx, network, length);
+    parts[k++] = formula_simple_path(ctx, network, length);
+    parts[k++] = formula_valid_transitions(ctx, network, length);
+
+    return Z3_mk_and(ctx, k, parts);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ********* Etape 2 ********* //
+
+
+
+
+
+
+
+
+
+
