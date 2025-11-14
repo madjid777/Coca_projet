@@ -1,0 +1,50 @@
+***************************** Commandes *****************************
+
+
+🔧 Compilation
+
+Avant de pouvoir tester le programme principal, il faut compiler le projet.
+Après avoir modifié le code source (notamment TunnelReduction.c), exécute simplement :
+
+
+make
+
+
+
+
+
+🚀 Lancer le programme principal (Réduction Tunnel → SAT)
+
+Commande :
+
+
+./graphProblemSolver -P Tunnel -R -c 4 -t graphs/TunnelNetwork/exemple1.dot
+
+
+Explications des options :
+
+./graphProblemSolver : Programme principal, qui appelle la fonction tn_reduction.
+
+-P Tunnel : Indique que l’on veut résoudre le problème Tunnel, et non le problème de Coloriage.
+
+-R : Active le mode Réduction vers SAT. Le programme génère alors une formule SAT via tn_reduction (dans TunnelReduction.c), puis l’envoie au solveur Z3.
+
+-c 4 : Indique que la longueur maximale du chemin recherché est 4.
+
+-t : Affiche la solution. Si le solveur trouve une formule SAT satisfaisable (donc un chemin valide), le programme affiche :
+- le chemin trouvé,
+- ainsi que l’état de la pile à chaque étape.
+
+
+
+
+
+🎨 Tester la réduction Colorabilité → SAT
+
+Commande :
+
+
+./graphProblemSolver -P Colouring -R -c 3 -t graphs/Colouring/3colorableSmall.dot
+
+
+Cette fois, le programme applique la réduction du problème de coloration de graphe vers SAT, puis utilise Z3 pour déterminer si le graphe est 3-coloriable.
